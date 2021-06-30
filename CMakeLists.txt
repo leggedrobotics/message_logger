@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8)
+cmake_minimum_required(VERSION 3.5)
 
 project(message_logger)
 
@@ -18,10 +18,11 @@ configure_file(
 
 if(NOT MELO_USE_COUT)
   message(STATUS "Building message_logger using ros.")
+  find_package(rclcpp REQUIRED)
   catkin_package(
-    INCLUDE_DIRS include ${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_INCLUDE_DESTINATION}
+    INCLUDE_DIRS include ${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_INCLUDE_DESTINATION} ${rclcpp_INCLUDE_DIRS}
     LIBRARIES ${PROJECT_NAME}
-    CATKIN_DEPENDS roscpp
+    DEPENDS ${rclcpp_LIBRARIES}
     CFG_EXTRAS message_logger.cmake
   )
 else()
@@ -38,11 +39,12 @@ if(DEFINED MELO_FUNCTION_PRINTS)
   add_definitions(-DMELO_FUNCTION_PRINTS)
 endif()
 
-add_definitions(-std=c++11 -fPIC -Wall)
+add_definitions(-std=c++14 -fPIC -Wall)
 
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
+  ${rclcpp_INCLUDE_DIRS}
 )
 
 add_library(${PROJECT_NAME} SHARED
@@ -50,13 +52,13 @@ add_library(${PROJECT_NAME} SHARED
   src/time/TimeStd.cpp
 )
 
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${rclcpp_LIBRARIES})
 
-install(DIRECTORY include/${PROJECT_NAME}/ ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_INCLUDE_DESTINATION}/
+install(DIRECTORY include/${PROJECT_NAME}/ ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_INCLUDE_DESTINATION}/ ${rclcpp_INCLUDE_DIRS}
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
   PATTERN "*.in" EXCLUDE
 )
-install(TARGETS ${PROJECT_NAME}
+install(TARGETS ${PROJECT_NAME} 
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -75,6 +77,7 @@ if(CATKIN_ENABLE_TESTING)
     target_link_libraries( test_${PROJECT_NAME}
       ${PROJECT_NAME}
       ${catkin_LIBRARIES}
+      pthread
       gtest_main
     )
     find_package(cmake_code_coverage QUIET)
