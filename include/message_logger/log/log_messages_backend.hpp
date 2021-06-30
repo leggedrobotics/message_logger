@@ -116,10 +116,9 @@ inline const std::string getLogLevel(const message_logger::log::levels::Level& l
 
 #ifdef MELO_FUNCTION_PRINTS
 inline std::string parseMemberName(const std::string& in) {
-    using namespace boost; // todo: replace with std as soon as gcc 4.9.x is standard in ubuntu repo
-    regex re(".*((:{2}|\\s)([a-zA-Z0-9]*)(<.*>)?(:{2})|\\s+)([a-zA-Z0-9]+)\\s*(<.*>)?\\s*\\(.*\\).*");
-    smatch match;
-    if(regex_match(in, match, re)) {
+    std::regex re(".*((:{2}|\\s)([a-zA-Z0-9]*)(<.*>)?(:{2})|\\s+)([a-zA-Z0-9]+)\\s*(<.*>)?\\s*\\(.*\\).*");
+    std::smatch match;
+    if(std::regex_match(in, match, re)) {
         return colorFunction + "[" + match.str(3) + match.str(5) + match.str(6) + "] ";
     }
     return std::string();
