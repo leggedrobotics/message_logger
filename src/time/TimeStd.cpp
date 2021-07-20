@@ -113,6 +113,8 @@ TimeStd::~TimeStd()
 }
 
 TimeStd& TimeStd::from(uint32_t sec, uint32_t nsec) {
+  sec_ = sec;
+  nsec_ = nsec;
   normalizeSecNSec(sec_, nsec_);
   return *this;
 }
