@@ -7,7 +7,7 @@
   <maintainer email="rdiethelm@anybotics.com">Remo Diethelm</maintainer>
   <license>BSD</license>
   <author email="cgehring@anybotics.com">Christian Gehring</author>
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake_auto</buildtool_depend>
   <depend>rclcpp</depend>
   <test_depend>gtest</test_depend>
 <!--   <test_depend>cmake_code_coverage</test_depend> -->

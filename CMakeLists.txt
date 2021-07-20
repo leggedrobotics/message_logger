@@ -2,75 +2,54 @@ cmake_minimum_required(VERSION 3.5)
 
 project(message_logger)
 
-# Find Catkin
-find_package(catkin_simple REQUIRED)
-catkin_simple()
+find_package(ament_cmake_auto REQUIRED)
+ament_auto_find_build_dependencies()
 
 include(CMakeDependentOption)
 cmake_dependent_option(MELO_USE_COUT "Use std::cout" OFF
                        "DEFINED ENV{ROS_DISTRO}" ON)
 
-# Configure header file before catkin_package
-catkin_destinations()
-configure_file(
-  include/message_logger/log/log_messages_backend_config.hpp.in
-  ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_INCLUDE_DESTINATION}/log/log_messages_backend_config.hpp @ONLY
-)
-
 if(NOT MELO_USE_COUT)
-  message(STATUS "Building message_logger using ros.")
-  find_package(rclcpp REQUIRED)
-  catkin_package(
-    INCLUDE_DIRS include ${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_INCLUDE_DESTINATION} ${rclcpp_INCLUDE_DIRS}
-    LIBRARIES ${PROJECT_NAME}
-    DEPENDS ${rclcpp_LIBRARIES}
-    CFG_EXTRAS message_logger.cmake
-  )
+  message(WARNING "Building message_logger using ros.")
 else()
-  message(STATUS "Building message_logger using std::cout.")
-  catkin_package(
-    INCLUDE_DIRS include ${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_INCLUDE_DESTINATION}
-    LIBRARIES ${PROJECT_NAME}
-    CATKIN_DEPENDS
-    CFG_EXTRAS message_logger.cmake
-  )
+  message(WARNING "Building message_logger using std::cout.")
 endif()
+
+configure_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/message_logger/log/log_messages_backend_config.hpp.in
+  ${CMAKE_CURRENT_BINARY_DIR}/include/message_logger/log/log_messages_backend_config.hpp @ONLY
+)
 
 if(DEFINED MELO_FUNCTION_PRINTS)
   add_definitions(-DMELO_FUNCTION_PRINTS)
 endif()
 
-add_definitions(-std=c++14 -fPIC -Wall)
+# Build
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 14)
+endif()
 
-cs_add_library(${PROJECT_NAME}
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+
+ament_auto_add_library(${PROJECT_NAME}
   src/log/globals.cpp
   src/time/Time.cpp
   src/time/TimeStd.cpp
 )
-target_link_libraries(${PROJECT_NAME} ${rclcpp_LIBRARIES})
 
-cs_install()
-cs_export()
+# Install
+install(
+  FILES ${CMAKE_CURRENT_BINARY_DIR}/include/message_logger/log/log_messages_backend_config.hpp
+  DESTINATION include/message_logger/log
+)
 
-##########
-## Test ##
-##########
-if(CATKIN_ENABLE_TESTING)
-  catkin_add_gtest(test_${PROJECT_NAME}
-    test/EmptyTests.cpp
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test
-  )
+ament_auto_package()
 
-  if(TARGET test_${PROJECT_NAME})
-    target_link_libraries( test_${PROJECT_NAME}
-      ${PROJECT_NAME}
-      ${catkin_LIBRARIES}
-      pthread
-      gtest_main
-    )
-    find_package(cmake_code_coverage QUIET)
-    if(cmake_code_coverage_FOUND)
-      add_gtest_coverage()
-    endif(cmake_code_coverage_FOUND)
-  endif()
+# Test
+if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
+  ament_add_gtest(empty_test test/EmptyTests.cpp)
+  target_link_libraries(empty_test)
 endif()

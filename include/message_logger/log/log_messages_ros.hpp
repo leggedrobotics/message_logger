@@ -43,12 +43,13 @@
 #include <rclcpp/clock.hpp>
 #include <rclcpp/rclcpp.hpp>
 
+#include "message_logger/log/globals.hpp"
 #include "message_logger/log/log_messages_backend.hpp"
 
 namespace message_logger {
 namespace log {
 
-rclcpp::Clock clock;
+extern rclcpp::Clock clock;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #define MELO_LOG(level, ...) \
