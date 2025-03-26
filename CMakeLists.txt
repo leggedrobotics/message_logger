@@ -146,6 +146,7 @@ else() # ROS version 2
 set(CMAKE_CXX_STANDARD 17)
 add_compile_options(-Wall -Wextra -Wpedantic -Werror=return-type)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(ROS2_BUILD TRUE)
 
 # Import options and set dependencies accordingly.
 include(cmake/message_logger.cmake)
